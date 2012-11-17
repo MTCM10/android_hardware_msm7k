@@ -244,7 +244,7 @@ int gpu_context_t::gralloc_alloc_buffer(size_t size, int usage, buffer_handle_t*
 
         if ((flags & private_handle_t::PRIV_FLAGS_USES_PMEM) != 0) {
           if ((flags & private_handle_t::PRIV_FLAGS_USES_PMEM_ADSP) != 0) {
-              LOGE("attempting to allocate a gralloc buffer with both the "
+              ALOGE("attempting to allocate a gralloc buffer with both the "
                    "USES_PMEM and USES_PMEM_ADSP flags.  Unsetting the "
                    "USES_PMEM_ADSP flag.");
               flags &= ~private_handle_t::PRIV_FLAGS_USES_PMEM_ADSP;
@@ -273,7 +273,7 @@ int gpu_context_t::gralloc_alloc_buffer(size_t size, int usage, buffer_handle_t*
                 LOGE("Pmem allocation failed. Trying ashmem");
                 goto try_ashmem;
             } else {
-                LOGE("couldn't open pmem (%s)", strerror(errno));
+                ALOGE("couldn't open pmem (%s)", strerror(errno));
             }
         }
     } else {
@@ -283,7 +283,7 @@ try_ashmem:
             lockState |= private_handle_t::LOCK_STATE_MAPPED;
             flags |= private_handle_t::PRIV_FLAGS_USES_ASHMEM;
         } else {
-            LOGE("Ashmem fallback failed");
+            ALOGE("Ashmem fallback failed");
         }
     }
 
@@ -295,7 +295,7 @@ try_ashmem:
         *pHandle = hnd;
     }
 
-    LOGE_IF(err, "gralloc failed err=%s", strerror(-err));
+    ALOGE_IF(err, "gralloc failed err=%s", strerror(-err));
 
     return err;
 }
@@ -372,7 +372,7 @@ int gpu_context_t::alloc_impl(int w, int h, int format, int usage,
         case HAL_PIXEL_FORMAT_YCrCb_420_SP:
         case HAL_PIXEL_FORMAT_YV12:
             if ((w&1) || (h&1)) {
-                LOGE("w or h is odd for the YUV format");
+                ALOGE("w or h is odd for the YUV format");
                 return -EINVAL;
             }
             alignedw = ALIGN(w, 16);
@@ -383,7 +383,7 @@ int gpu_context_t::alloc_impl(int w, int h, int format, int usage,
             break;
 
         default:
-            LOGE("unrecognized pixel format: %d", format);
+            ALOGE("unrecognized pixel format: %d", format);
             return -EINVAL;
     }
 

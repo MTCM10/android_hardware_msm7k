@@ -71,13 +71,13 @@ static int gralloc_map(gralloc_module_t const* module,
                 PROT_READ|PROT_WRITE, MAP_SHARED, hnd->fd, 0);
         }
         if (mappedAddress == MAP_FAILED) {
-            LOGE("Could not mmap handle %p, fd=%d (%s)",
+            ALOGE("Could not mmap handle %p, fd=%d (%s)",
                     handle, hnd->fd, strerror(errno));
             hnd->base = 0;
             return -errno;
         }
         hnd->base = intptr_t(mappedAddress) + hnd->offset;
-        //LOGD("gralloc_map() succeeded fd=%d, off=%d, size=%d, vaddr=%p", 
+        //ALOGD("gralloc_map() succeeded fd=%d, off=%d, size=%d, vaddr=%p", 
         //        hnd->fd, hnd->offset, hnd->size, mappedAddress);
     }
     *vaddr = (void*)hnd->base;
@@ -95,9 +95,9 @@ static int gralloc_unmap(gralloc_module_t const* module,
         base = (void*)(intptr_t(base) - hnd->offset);
         size += hnd->offset;
 #endif
-        //LOGD("unmapping from %p, size=%d", base, size);
+        //ALOGD("unmapping from %p, size=%d", base, size);
         if (munmap(base, size) < 0) {
-            LOGE("Could not unmap %s", strerror(errno));
+            ALOGE("Could not unmap %s", strerror(errno));
         }
     }
     hnd->base = 0;
@@ -149,7 +149,7 @@ int gralloc_unregister_buffer(gralloc_module_t const* module,
 
     private_handle_t* hnd = (private_handle_t*)handle;
     
-    LOGE_IF(hnd->lockState & private_handle_t::LOCK_STATE_READ_MASK,
+    ALOGE_IF(hnd->lockState & private_handle_t::LOCK_STATE_READ_MASK,
             "[unregister] handle %p still locked (state=%08x)",
             hnd, hnd->lockState);
 
@@ -173,7 +173,7 @@ int terminateBuffer(gralloc_module_t const* module,
      * to un-map it. It's an error to be here with a locked buffer.
      */
 
-    LOGE_IF(hnd->lockState & private_handle_t::LOCK_STATE_READ_MASK,
+    ALOGE_IF(hnd->lockState & private_handle_t::LOCK_STATE_READ_MASK,
             "[terminate] handle %p still locked (state=%08x)",
             hnd, hnd->lockState);
 
@@ -216,16 +216,16 @@ int gralloc_lock(gralloc_module_t const* module,
 
         if (current_value & private_handle_t::LOCK_STATE_WRITE) {
             // already locked for write 
-            LOGE("handle %p already locked for write", handle);
+            ALOGE("handle %p already locked for write", handle);
             return -EBUSY;
         } else if (current_value & private_handle_t::LOCK_STATE_READ_MASK) {
             // already locked for read
             if (usage & (GRALLOC_USAGE_SW_WRITE_MASK | GRALLOC_USAGE_HW_RENDER)) {
-                LOGE("handle %p already locked for read", handle);
+                ALOGE("handle %p already locked for read", handle);
                 return -EBUSY;
             } else {
                 // this is not an error
-                //LOGD("%p already locked for read... count = %d", 
+                //ALOGD("%p already locked for read... count = %d", 
                 //        handle, (current_value & ~(1<<31)));
             }
         }
@@ -297,7 +297,7 @@ int gralloc_unlock(gralloc_module_t const* module,
             err = ioctl(hnd->fd, ASHMEM_CACHE_FLUSH_RANGE, NULL);
         }         
 
-        LOGE_IF(err < 0, "cannot flush handle %p (offs=%x len=%x, flags = 0x%x) err=%s\n",
+        ALOGE_IF(err < 0, "cannot flush handle %p (offs=%x len=%x, flags = 0x%x) err=%s\n",
                 hnd, hnd->offset, hnd->size, hnd->flags, strerror(errno));
         hnd->flags &= ~private_handle_t::PRIV_FLAGS_NEEDS_FLUSH;
     }
@@ -315,7 +315,7 @@ int gralloc_unlock(gralloc_module_t const* module,
         }
 
         if ((new_value & private_handle_t::LOCK_STATE_READ_MASK) == 0) {
-            LOGE("handle %p not locked", handle);
+            ALOGE("handle %p not locked", handle);
             return -EINVAL;
         }
 
